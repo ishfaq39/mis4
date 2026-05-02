@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SPM NIWAS Training & Expenditure Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root{
+      --bg:#eef9ff;--panel:#ffffff;--ink:#0f2942;--muted:#64748b;--blue:#0ea5e9;--cyan:#06b6d4;--teal:#14b8a6;--green:#22c55e;--amber:#f59e0b;--red:#ef4444;--line:#dbeafe;--shadow:0 18px 45px rgba(14, 116, 144, .14);--radius:22px;
+    }
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(135deg,#e0f7ff 0%,#eef9ff 42%,#f7fffb 100%);color:var(--ink)}
+    header{padding:28px 28px 18px;background:linear-gradient(135deg,#075985,#0891b2 50%,#14b8a6);color:white;position:sticky;top:0;z-index:20;box-shadow:0 8px 30px rgba(3,105,161,.25)}
+    .top{display:flex;gap:18px;align-items:center;justify-content:space-between;flex-wrap:wrap}.brand h1{margin:0;font-size:28px;letter-spacing:-.03em}.brand p{margin:8px 0 0;color:#dffbff}.actions{display:flex;gap:10px;flex-wrap:wrap}.btn{border:0;border-radius:999px;padding:10px 14px;cursor:pointer;font-weight:700;background:white;color:#075985;text-decoration:none}.btn.alt{background:rgba(255,255,255,.18);color:white;border:1px solid rgba(255,255,255,.35)}
+    main{padding:22px;max-width:1500px;margin:auto}.notice{background:#fff7ed;border:1px solid #fed7aa;color:#7c2d12;padding:12px 16px;border-radius:16px;margin-bottom:16px;display:none}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}.tab{padding:10px 14px;border:1px solid #bae6fd;border-radius:999px;background:white;color:#075985;font-weight:800;cursor:pointer}.tab.active{background:#0ea5e9;color:white;border-color:#0ea5e9}.grid{display:grid;grid-template-columns:repeat(4,minmax(180px,1fr));gap:16px}.card{background:rgba(255,255,255,.94);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}.metric{cursor:pointer;transition:.15s transform,.15s box-shadow}.metric:hover{transform:translateY(-3px);box-shadow:0 24px 55px rgba(14,116,144,.22)}.metric .label{color:var(--muted);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}.metric .value{font-size:34px;font-weight:900;margin:8px 0}.metric .hint{color:#0e7490;font-size:13px}.section{margin-top:18px}.section h2{margin:0 0 12px;font-size:20px}.split{display:grid;grid-template-columns:1.15fr .85fr;gap:16px}.wide{grid-column:1/-1}.filters{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 16px}.filters select,.filters input{border:1px solid #bae6fd;border-radius:14px;padding:10px;background:white;min-width:160px}.tablewrap{overflow:auto;max-height:560px;border-radius:16px;border:1px solid #dbeafe;background:white}table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px 12px;border-bottom:1px solid #e0f2fe;text-align:left;vertical-align:top}th{position:sticky;top:0;background:#f0f9ff;color:#075985;z-index:1}tr:hover td{background:#f8fdff}.pill{display:inline-block;padding:4px 9px;border-radius:999px;background:#e0f2fe;color:#075985;font-weight:800;font-size:12px}.small{font-size:12px;color:var(--muted)}.modal{position:fixed;inset:0;background:rgba(15,41,66,.55);display:none;align-items:center;justify-content:center;z-index:50;padding:18px}.modal.open{display:flex}.modalbox{width:min(1180px,96vw);max-height:88vh;overflow:hidden;background:white;border-radius:24px;box-shadow:0 30px 80px rgba(2,6,23,.35);display:flex;flex-direction:column}.modalhead{padding:18px;border-bottom:1px solid #e0f2fe;display:flex;justify-content:space-between;gap:12px}.modalbody{padding:18px;overflow:auto}.x{border:0;background:#e0f2fe;color:#075985;border-radius:12px;padding:8px 12px;font-weight:900;cursor:pointer}.iframegrid{display:grid;grid-template-columns:1fr;gap:14px}.iframebox iframe{width:100%;height:650px;border:1px solid #bae6fd;border-radius:18px;background:white}.loader{padding:28px;text-align:center;color:#075985;font-weight:800}@media(max-width:1100px){.grid{grid-template-columns:repeat(2,1fr)}.split{grid-template-columns:1fr}}@media(max-width:620px){header{position:static}.grid{grid-template-columns:1fr}.brand h1{font-size:22px}.metric .value{font-size:28px}}
+  </style>
+</head>
+<body>
+<header>
+  <div class="top">
+    <div class="brand">
+      <h1>SPM NIWAS Training & Expenditure Dashboard</h1>
+      <p>Live dashboard for trainings, participants, certificate courses, workshops, webinars, events and expenditure.</p>
+    </div>
+    <div class="actions">
+      <button class="btn" onclick="loadAll(true)">Refresh Data</button>
+      <a class="btn alt" target="_blank" href="https://docs.google.com/spreadsheets/d/1QBiH1F0IvXaKWKaOkqfDVnHPioQw2BDGH2Ia5CILElg/edit">Attendance Sheet</a>
+      <a class="btn alt" target="_blank" href="https://docs.google.com/spreadsheets/d/1aAgDnovRCH8D8xoZvDB4_41wUJdA1qQjPL4ZkhH2mQA/edit">Expenditure Sheet</a>
+    </div>
+  </div>
+</header>
+<main>
+  <div id="notice" class="notice"></div>
+  <div class="tabs" id="tabs"></div>
+  <div id="app"><div class="loader">Loading dashboard from Google Sheets...</div></div>
+</main>
+<div id="modal" class="modal" onclick="if(event.target.id==='modal')closeModal()"><div class="modalbox"><div class="modalhead"><div><b id="modalTitle">Details</b><div id="modalSub" class="small"></div></div><button class="x" onclick="closeModal()">Close</button></div><div id="modalBody" class="modalbody"></div></div></div>
+<script>
+const ATTENDANCE_ID='1QBiH1F0IvXaKWKaOkqfDVnHPioQw2BDGH2Ia5CILElg';
+const EXP_ID='1aAgDnovRCH8D8xoZvDB4_41wUJdA1qQjPL4ZkhH2mQA';
+const attendanceSheets=['Physical','Online','Offsite','Certificate course','Webinar','Workshop','Report'];
+const expenditureSheets=['External','Sheet1','Expenditure','Training Expenditure Details'];
+let state={attendance:{},expenditure:{},active:'Overview',charts:[]};
+const tabs=['Overview','Trainings','Certificate course','Workshop','Webinar','Events/Offsite','Expenditure','Original dashboards'];
+const clean=s=>(s??'').toString().replace(/\s+/g,' ').trim();
+const num=v=>{let n=parseFloat((v??'').toString().replace(/[^0-9.-]/g,''));return isNaN(n)?0:n};
+const money=n=>'₹ '+Math.round(n).toLocaleString('en-IN');
+const esc=s=>clean(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const sheetUrl=(id,sheet)=>`https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheet)}`;
+async function fetchSheet(id,sheet){
+  const r=await fetch(sheetUrl(id,sheet)); if(!r.ok) throw new Error(sheet+' not accessible');
+  const txt=await r.text(); const json=JSON.parse(txt.substring(txt.indexOf('{'),txt.lastIndexOf('}')+1));
+  const cols=(json.table.cols||[]).map((c,i)=>clean(c.label)||`Column ${i+1}`);
+  const rows=(json.table.rows||[]).map(row=>{let o={}; (row.c||[]).forEach((c,i)=>o[cols[i]]=c?clean(c.f??c.v):''); return o;}).filter(o=>Object.values(o).some(Boolean));
+  return rows;
+}
+function detect(row,keys){const hs=Object.keys(row); for(const k of keys){const f=hs.find(h=>h.toLowerCase().includes(k)); if(f) return f;} return '';}
+function normTraining(rows,sheet){return rows.map((r,i)=>{const prog=detect(r,['program','scheme','mission']);const name=detect(r,['training name','name of training','course','topic','title']);const year=detect(r,['fy','year']);const type=detect(r,['type','mode']);const part=detect(r,['participant','official','attended','trained','no.']);const date=detect(r,['date']);const stateCol=detect(r,['state']);return {source:sheet,row:i+1,program:clean(r[prog])||inferProgram(r),name:clean(r[name])||inferName(r),year:clean(r[year])||inferYear(r),type:clean(r[type])||sheet,participants:num(r[part]),date:clean(r[date]),state:clean(r[stateCol]),raw:r};}).filter(x=>x.name||x.program||x.year||x.participants);}
+function inferProgram(r){const t=Object.values(r).map(clean).join(' '); if(/\bJJM\b/i.test(t)) return 'JJM'; if(/\bSBM\b/i.test(t)) return 'SBM'; return '';}
+function inferName(r){return Object.values(r).map(clean).find(v=>v.length>12&&!/^\d/.test(v))||'';}
+function inferYear(r){const t=Object.values(r).map(clean).join(' '); const m=t.match(/20\d{2}-\d{2}|20\d{2}/); return m?m[0]:'';}
+function normExpense(rows,sheet){return rows.map((r,i)=>{const prog=detect(r,['program']);const name=detect(r,['training name','course','name']);const mode=detect(r,['mode','type']);const date=detect(r,['date']);const total=detect(r,['total']);let totalVal= total?num(r[total]):Object.entries(r).reduce((a,[k,v])=>/program|name|mode|date/i.test(k)?a:a+num(v),0);return {source:sheet,row:i+1,program:clean(r[prog])||inferProgram(r),name:clean(r[name])||inferName(r),type:clean(r[mode]),date:clean(r[date]),year:inferYear(r),total:totalVal,raw:r};}).filter(x=>x.name||x.program||x.total);}
+function group(arr,key,val='count'){const m={}; arr.forEach(x=>{const k=clean(typeof key==='function'?key(x):x[key])||'Not specified'; m[k]=(m[k]||0)+(val==='count'?1:num(x[val]));}); return Object.entries(m).sort((a,b)=>b[1]-a[1]);}
+function sum(arr,k){return arr.reduce((a,x)=>a+num(x[k]),0)}
+function allTrainings(){return Object.entries(state.attendance).flatMap(([s,rows])=>normTraining(rows,s));}
+function allExpenses(){return Object.entries(state.expenditure).flatMap(([s,rows])=>normExpense(rows,s));}
+function setTabs(){document.getElementById('tabs').innerHTML=tabs.map(t=>`<button class="tab ${state.active===t?'active':''}" onclick="state.active='${t}';render()">${t}</button>`).join('')}
+function card(label,value,hint,fn){return `<div class="card metric" onclick="${fn||''}"><div class="label">${label}</div><div class="value">${value}</div><div class="hint">${hint||'Click to verify details'}</div></div>`}
+function render(){setTabs(); state.charts.forEach(c=>c.destroy()); state.charts=[]; const app=document.getElementById('app'); const tr=allTrainings(), ex=allExpenses();
+ if(state.active==='Overview') return renderOverview(app,tr,ex);
+ if(state.active==='Trainings') return renderDataset(app,tr,'All training attendance records');
+ if(state.active==='Certificate course') return renderDataset(app,tr.filter(x=>/certificate/i.test(x.source+' '+x.type+' '+x.name)),'Certificate course records');
+ if(state.active==='Workshop') return renderDataset(app,tr.filter(x=>/workshop/i.test(x.source+' '+x.type+' '+x.name)),'Workshop records');
+ if(state.active==='Webinar') return renderDataset(app,tr.filter(x=>/webinar/i.test(x.source+' '+x.type+' '+x.name)),'Webinar records');
+ if(state.active==='Events/Offsite') return renderDataset(app,tr.filter(x=>/offsite|event|special/i.test(x.source+' '+x.type+' '+x.name)),'Offsite / special event records');
+ if(state.active==='Expenditure') return renderExpense(app,ex);
+ if(state.active==='Original dashboards') return renderIframes(app);
+}
+function renderOverview(app,tr,ex){app.innerHTML=`<div class="grid">${card('Total attendance records',tr.length,'All rows fetched from attendance tabs','openDetails("All attendance", allTrainings())')}${card('Total participants',sum(tr,'participants').toLocaleString('en-IN'),'Sum of participant/officials trained columns','openDetails("Participant records", allTrainings().filter(x=>x.participants))')}${card('Total expenditure',money(sum(ex,'total')),'Sum of total expenditure rows','openDetails("Expenditure details", allExpenses())')}${card('Programs covered',group(tr,'program').length,'JJM, SBM and other programs','openDetails("Program wise details", allTrainings())')}</div><div class="section split"><div class="card"><h2>Training records by type</h2><canvas id="c1"></canvas></div><div class="card"><h2>Participants by program</h2><canvas id="c2"></canvas></div><div class="card wide"><h2>Year and program summary</h2>${summaryTable(tr,ex)}</div></div>`; chart('c1',group(tr,x=>x.source),'bar'); chart('c2',group(tr,'program'),'doughnut');}
+function summaryTable(tr,ex){const keys=[...new Set(tr.map(x=>(x.year||'Not specified')+'|'+(x.program||'Not specified')))];return `<div class="tablewrap"><table><thead><tr><th>Year</th><th>Program</th><th>Type / category</th><th>No. of trainings/records</th><th>Participants attended</th><th>Expenditure</th></tr></thead><tbody>${keys.map(k=>{const [y,p]=k.split('|');const a=tr.filter(x=>(x.year||'Not specified')===y&&(x.program||'Not specified')===p);const e=ex.filter(x=>(x.year||'Not specified')===y&&(x.program||'Not specified')===p);return `<tr><td>${esc(y)}</td><td><span class="pill">${esc(p)}</span></td><td>${group(a,'source').map(x=>esc(x[0])+': '+x[1]).join('<br>')}</td><td><a href="#" onclick='openDetails("${esc(y)} ${esc(p)} training records", ${JSON.stringify(a).replace(/'/g,"&#39;")});return false'>${a.length}</a></td><td><a href="#" onclick='openDetails("${esc(y)} ${esc(p)} participant records", ${JSON.stringify(a.filter(x=>x.participants)).replace(/'/g,"&#39;")});return false'>${sum(a,'participants').toLocaleString('en-IN')}</a></td><td><a href="#" onclick='openDetails("${esc(y)} ${esc(p)} expenditure", ${JSON.stringify(e).replace(/'/g,"&#39;")});return false'>${money(sum(e,'total'))}</a></td></tr>`}).join('')}</tbody></table></div>`}
+function renderDataset(app,data,title){app.innerHTML=`<div class="grid">${card('Records',data.length,'Click for full records','openDetails("'+title+'", currentFiltered())')}${card('Participants',sum(data,'participants').toLocaleString('en-IN'),'Click for attendance rows','openDetails("Participants", currentFiltered().filter(x=>x.participants))')}${card('Years',group(data,'year').length,'Click for year-wise records','openDetails("Year-wise source data", currentFiltered())')}${card('Programs',group(data,'program').length,'Click for program-wise records','openDetails("Program source data", currentFiltered())')}</div><div class="section split"><div class="card"><h2>${title} by year</h2><canvas id="c1"></canvas></div><div class="card"><h2>${title} by program</h2><canvas id="c2"></canvas></div><div class="card wide"><h2>Drill-down table</h2>${filterBar(data)}${table(data)}</div></div>`; window._dataset=data; chart('c1',group(data,'year'),'bar'); chart('c2',group(data,'program'),'doughnut');}
+function renderExpense(app,data){app.innerHTML=`<div class="grid">${card('Expenditure rows',data.length,'Click for all expenditure rows','openDetails("All expenditure rows", allExpenses())')}${card('Total expenditure',money(sum(data,'total')),'Click to verify totals','openDetails("Expenditure details", allExpenses())')}${card('Programs',group(data,'program').length,'Click for program rows','openDetails("Program expenditure", allExpenses())')}${card('Average per row',money(data.length?sum(data,'total')/data.length:0),'Based on expenditure rows','openDetails("All expenditure rows", allExpenses())')}</div><div class="section split"><div class="card"><h2>Expenditure by program</h2><canvas id="c1"></canvas></div><div class="card"><h2>Expenditure by mode/type</h2><canvas id="c2"></canvas></div><div class="card wide"><h2>Expenditure details</h2>${expenseTable(data)}</div></div>`; chart('c1',group(data,'program','total'),'bar'); chart('c2',group(data,'type','total'),'doughnut');}
+function renderIframes(app){app.innerHTML=`<div class="notice" style="display:block">These embedded views show the original Google Sheet dashboards/pivot tables. If Google blocks embedding, use the buttons above to open the sheets directly.</div><div class="iframegrid"><div class="card iframebox"><h2>Original attendance dashboard / pivot sheet</h2><iframe src="https://docs.google.com/spreadsheets/d/${ATTENDANCE_ID}/preview"></iframe></div><div class="card iframebox"><h2>Original expenditure dashboard / pivot sheet</h2><iframe src="https://docs.google.com/spreadsheets/d/${EXP_ID}/preview"></iframe></div></div>`}
+function filterBar(data){const yrs=group(data,'year').map(x=>x[0]), pros=group(data,'program').map(x=>x[0]);return `<div class="filters"><input id="q" placeholder="Search program/course/state" oninput="applyFilters()"><select id="fy" onchange="applyFilters()"><option value="">All years</option>${yrs.map(y=>`<option>${esc(y)}</option>`).join('')}</select><select id="prog" onchange="applyFilters()"><option value="">All programs</option>${pros.map(p=>`<option>${esc(p)}</option>`).join('')}</select><button class="btn" onclick="exportCSV(currentFiltered(),'dashboard_details.csv')">Export CSV</button></div><div id="filteredTable">${table(data)}</div>`}
+function applyFilters(){document.getElementById('filteredTable').innerHTML=table(currentFiltered())}
+function currentFiltered(){let d=window._dataset||[]; const q=clean(document.getElementById('q')?.value).toLowerCase(), fy=document.getElementById('fy')?.value||'', p=document.getElementById('prog')?.value||''; return d.filter(x=>(!q||JSON.stringify(x).toLowerCase().includes(q))&&(!fy||x.year===fy)&&(!p||x.program===p));}
+function table(data){return `<div class="tablewrap"><table><thead><tr><th>Source tab</th><th>Program</th><th>Year</th><th>Type</th><th>Name of program / training</th><th>Date</th><th>Participants</th><th>State</th></tr></thead><tbody>${data.map(x=>`<tr><td>${esc(x.source)}</td><td>${esc(x.program)}</td><td>${esc(x.year)}</td><td>${esc(x.type)}</td><td>${esc(x.name)}</td><td>${esc(x.date)}</td><td>${x.participants?x.participants.toLocaleString('en-IN'):''}</td><td>${esc(x.state)}</td></tr>`).join('')}</tbody></table></div>`}
+function expenseTable(data){return `<div class="tablewrap"><table><thead><tr><th>Source tab</th><th>Program</th><th>Year</th><th>Mode</th><th>Training name</th><th>Date</th><th>Total expenditure</th></tr></thead><tbody>${data.map(x=>`<tr><td>${esc(x.source)}</td><td>${esc(x.program)}</td><td>${esc(x.year)}</td><td>${esc(x.type)}</td><td>${esc(x.name)}</td><td>${esc(x.date)}</td><td>${money(x.total)}</td></tr>`).join('')}</tbody></table></div>`}
+function chart(id,pairs,type){const el=document.getElementById(id); if(!el) return; const c=new Chart(el,{type,data:{labels:pairs.map(x=>x[0]),datasets:[{label:'Value',data:pairs.map(x=>x[1]),borderWidth:1}]},options:{responsive:true,plugins:{legend:{display:type==='doughnut'}},scales:type==='doughnut'?{}:{y:{beginAtZero:true}}}}); state.charts.push(c)}
+function openDetails(title,data){document.getElementById('modalTitle').textContent=title;document.getElementById('modalSub').textContent=(data||[]).length+' records';document.getElementById('modalBody').innerHTML=Array.isArray(data)&&data[0]?.total!==undefined?expenseTable(data):table(data||[]);document.getElementById('modal').classList.add('open')}
+function closeModal(){document.getElementById('modal').classList.remove('open')}
+function exportCSV(data,filename){const rows=data.map(x=>x.raw||x); const keys=[...new Set(rows.flatMap(Object.keys))]; const csv=[keys.join(','),...rows.map(r=>keys.map(k=>'"'+clean(r[k]).replace(/"/g,'""')+'"').join(','))].join('\n'); const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=filename;a.click();}
+async function loadAll(manual=false){document.getElementById('app').innerHTML='<div class="loader">Loading dashboard from Google Sheets...</div>';document.getElementById('notice').style.display='none';state.attendance={};state.expenditure={};let errors=[];
+ await Promise.all(attendanceSheets.map(async s=>{try{const rows=await fetchSheet(ATTENDANCE_ID,s); if(rows.length) state.attendance[s]=rows;}catch(e){errors.push('Attendance tab not loaded: '+s)}}));
+ for(const s of expenditureSheets){try{const rows=await fetchSheet(EXP_ID,s); if(rows.length){state.expenditure[s]=rows; break;}}catch(e){}}
+ if(!Object.keys(state.expenditure).length) errors.push('Expenditure sheet could not be loaded. Check sheet/tab name and sharing permissions.');
+ if(errors.length){const n=document.getElementById('notice');n.innerHTML='<b>Note:</b> '+errors.join('<br>')+'<br>For GitHub hosting, set Google Sheets to “Anyone with the link can view”, or publish the sheets to web.';n.style.display='block'}
+ render();
+}
+loadAll();
+</script>
+</body>
+</html>
